@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+    <h1>
+        Take control of your <span>expenses</span><br>
+        without the stress
+    </h1>
+
+    <p>
+        Track income, manage expenses, and understand where your money goes –
+        all in one simple dashboard.
+    </p>
+
+    <div class="hero-actions">
+        <a href="/expense/create" class="btn primary">Add Expense</a>
+        <a href="/summary" class="btn secondary">View Summary</a>
+    </div>
+</section>
+
+<section class="stats">
+
+    <div class="stat-card">
+        <p>Total Income</p>
+        <h2>₹ {{ total_income }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <p>Total Expense</p>
+        <h2>₹ {{ total_expense }}</h2>
+    </div>
+
+    <div class="stat-card highlight">
+        <p>Balance</p>
+        <h2>₹ {{ balance }}</h2>
+    </div>
+
+</section>
+
+{% endblock %}

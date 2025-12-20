@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}TrackIt{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header class="topbar">
+    <div class="logo">TrackIt</div>
+
+    <nav>
+        {% if "user_id" in session %}
+            <!-- Logged-in links -->
+            <a href="{{ url_for('home.dashboard') }}"
+               class="{% if request.endpoint == 'home.dashboard' %}active{% endif %}">
+                Dashboard
+            </a>
+
+            <a href="{{ url_for('income.list') }}"
+               class="{% if request.endpoint.startswith('income.') %}active{% endif %}">
+                Income
+            </a>
+
+            <a href="{{ url_for('expense.list') }}"
+               class="{% if request.endpoint.startswith('expense.') %}active{% endif %}">
+                Expense
+            </a>
+
+            <a href="{{ url_for('summary.monthly') }}"
+               class="{% if request.endpoint.startswith('summary.') %}active{% endif %}">
+                Summary
+            </a>
+
+            <a href="{{ url_for('profile.view_profile') }}"
+               class="{% if request.endpoint.startswith('profile.') %}active{% endif %}">
+                Profile
+            </a>
+
+            <a href="{{ url_for('profile.logout') }}">
+                Logout
+            </a>
+
+        {% else %}
+            <!-- Guest links -->
+            <a href="{{ url_for('users.login_user') }}"
+               class="{% if request.endpoint == 'users.login_user' %}active{% endif %}">
+                Login
+            </a>
+
+            <a href="{{ url_for('users.register_user') }}"
+               class="{% if request.endpoint == 'users.register_user' %}active{% endif %}">
+                Register
+            </a>
+        {% endif %}
+    </nav>
+</header>
+
+<!-- ================= FLASH MESSAGES ================= -->
+<div class="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+<!-- ================= PAGE CONTENT ================= -->
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+    © 2025 TrackIt – Personal Expense Tracker
+</footer>
+
+</body>
+</html>

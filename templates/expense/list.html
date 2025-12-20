@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Expenses{% endblock %}
+
+{% block content %}
+<div class="list-page">
+
+    <div class="list-header">
+        <h2>Expenses</h2>
+
+        <a href="{{ url_for('expense.create') }}" class="add-btn">
+            + Add Expense
+        </a>
+
+        {% if not expenses %}
+            <span class="empty-inline">No expense records found.</span>
+        {% endif %}
+    </div>
+
+    {% if expenses %}
+    <div class="table-wrapper">
+        <table class="list-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Purpose</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exp in expenses %}
+                <tr>
+                    <td>{{ exp.date }}</td>
+                    <td>{{ exp.purpose }}</td>
+                    <td>{{ exp.amount }}</td>
+                    <td>
+                        <a href="{{ url_for('expense.delete', expense_id=exp.id) }}">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

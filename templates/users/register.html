@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="container auth-page">
+    <div class="form-card auth-card">
+        <h2>Create Account</h2>
+
+        <form method="POST">
+            <label>Username</label>
+            <input type="text" name="username" required>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <label>Confirm Password</label>
+            <input type="password" name="confirm_password" required>
+
+            <button type="submit" class="btn primary full-btn">
+                Register
+            </button>
+        </form>
+
+        <p class="auth-text">
+            Already have an account?
+            <a href="/login">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

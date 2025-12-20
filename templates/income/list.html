@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="list-page">
+
+    <!-- Header -->
+    <div class="list-header">
+        <h2>Income</h2>
+
+        <!-- Correct Add Income link -->
+        <a href="{{ url_for('income.add') }}" class="add-btn">
+            + Add Income
+        </a>
+    </div>
+
+    {% if not incomes %}
+        <span class="empty-inline">No income records found.</span>
+    {% endif %}
+
+    {% if incomes %}
+    <div class="table-wrapper">
+        <table class="list-table">
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Source</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for inc in incomes %}
+                <tr>
+                    <td>{{ inc.amount }}</td>
+                    <td>{{ inc.source }}</td>
+                    <td>{{ inc.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
