@@ -1,17 +1,25 @@
-import mysql.connector as m
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
 
+# =========================
+# DATABASE CONNECTION
+# =========================
 def connectdb():
-    return m.connect(
-        host="localhost",
-        user="root",
-        passwd="",
-        database="PROJECT"
-    )
+    DATABASE_URL = os.getenv("DATABASE_URL")
+
+    if not DATABASE_URL:
+        raise Exception("DATABASE_URL is not set")
+
+    return psycopg2.connect(DATABASE_URL)
 
 
+# =========================
+# AUTH
+# =========================
 def register(username, password):
     con = cursor = None
     try:
@@ -19,7 +27,7 @@ def register(username, password):
         cursor = con.cursor()
 
         cursor.execute(
-            "SELECT id FROM USERS WHERE username = %s",
+            "SELECT id FROM users WHERE username = %s",
             (username,)
         )
         if cursor.fetchone():
@@ -27,13 +35,13 @@ def register(username, password):
 
         hashed_password = generate_password_hash(password)
         cursor.execute(
-            "INSERT INTO USERS (username, password) VALUES (%s, %s)",
+            "INSERT INTO users (username, password) VALUES (%s, %s)",
             (username, hashed_password)
         )
         con.commit()
         return True, "User registered successfully"
 
-    except m.Error as err:
+    except Exception as err:
         return False, f"Database error: {err}"
 
     finally:
@@ -47,10 +55,10 @@ def login(username, password):
     con = cursor = None
     try:
         con = connectdb()
-        cursor = con.cursor(dictionary=True)
+        cursor = con.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute(
-            "SELECT * FROM USERS WHERE username = %s",
+            "SELECT * FROM users WHERE username = %s",
             (username,)
         )
         user = cursor.fetchone()
@@ -60,7 +68,7 @@ def login(username, password):
 
         return None
 
-    except m.Error:
+    except Exception:
         return None
 
     finally:
@@ -70,6 +78,9 @@ def login(username, password):
             con.close()
 
 
+# =========================
+# INCOME
+# =========================
 def add_income(user_id, amount, source, date):
     try:
         amount = float(amount)
@@ -82,16 +93,13 @@ def add_income(user_id, amount, source, date):
         cursor = con.cursor()
 
         cursor.execute(
-            "INSERT INTO INCOME (user_id, date, amount, source) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO income (user_id, date, amount, source) VALUES (%s, %s, %s, %s)",
             (user_id, date, amount, source)
         )
         con.commit()
         return True, "Income added successfully"
 
-    except ValueError:
-        return False, "Invalid amount or date format"
-
-    except m.Error as err:
+    except Exception as err:
         return False, f"Database error: {err}"
 
     finally:
@@ -105,15 +113,15 @@ def income_details(user_id):
     con = cursor = None
     try:
         con = connectdb()
-        cursor = con.cursor(dictionary=True)
+        cursor = con.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute(
-            "SELECT id, date, amount, source FROM INCOME WHERE user_id = %s ORDER BY date DESC",
+            "SELECT id, date, amount, source FROM income WHERE user_id = %s ORDER BY date DESC",
             (user_id,)
         )
         return True, cursor.fetchall()
 
-    except m.Error as err:
+    except Exception as err:
         return False, f"Database error: {err}"
 
     finally:
@@ -121,7 +129,8 @@ def income_details(user_id):
             cursor.close()
         if con:
             con.close()
-              
+
+
 def delete_income(user_id, income_id):
     con = cursor = None
     try:
@@ -129,14 +138,14 @@ def delete_income(user_id, income_id):
         cursor = con.cursor()
 
         cursor.execute(
-            "DELETE FROM INCOME WHERE id = %s AND user_id = %s",
+            "DELETE FROM income WHERE id = %s AND user_id = %s",
             (income_id, user_id)
         )
         con.commit()
 
         return (True, "Income deleted successfully") if cursor.rowcount else (False, "Not authorized")
 
-    except m.Error as err:
+    except Exception as err:
         return False, f"Database error: {err}"
 
     finally:
@@ -144,6 +153,11 @@ def delete_income(user_id, income_id):
             cursor.close()
         if con:
             con.close()
+
+
+# =========================
+# EXPENSE
+# =========================
 def add_expense(user_id, amount, date, purpose):
     try:
         amount = float(amount)
@@ -156,16 +170,13 @@ def add_expense(user_id, amount, date, purpose):
         cursor = con.cursor()
 
         cursor.execute(
-            "INSERT INTO EXPENSE (user_id, date, amount, purpose) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO expense (user_id, date, amount, purpose) VALUES (%s, %s, %s, %s)",
             (user_id, date, amount, purpose)
         )
         con.commit()
         return True, "Expense added successfully"
 
-    except ValueError:
-        return False, "Invalid amount or date format"
-
-    except m.Error as err:
+    except Exception as err:
         return False, f"Database error: {err}"
 
     finally:
@@ -173,20 +184,21 @@ def add_expense(user_id, amount, date, purpose):
             cursor.close()
         if con:
             con.close()
+
 
 def expense_details(user_id):
     con = cursor = None
     try:
         con = connectdb()
-        cursor = con.cursor(dictionary=True)
+        cursor = con.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute(
-            "SELECT id, date, amount, purpose FROM EXPENSE WHERE user_id = %s ORDER BY date DESC",
+            "SELECT id, date, amount, purpose FROM expense WHERE user_id = %s ORDER BY date DESC",
             (user_id,)
         )
         return True, cursor.fetchall()
 
-    except m.Error as err:
+    except Exception as err:
         return False, f"Database error: {err}"
 
     finally:
@@ -194,6 +206,7 @@ def expense_details(user_id):
             cursor.close()
         if con:
             con.close()
+
 
 def delete_expense(user_id, expense_id):
     con = cursor = None
@@ -202,14 +215,14 @@ def delete_expense(user_id, expense_id):
         cursor = con.cursor()
 
         cursor.execute(
-            "DELETE FROM EXPENSE WHERE id = %s AND user_id = %s",
+            "DELETE FROM expense WHERE id = %s AND user_id = %s",
             (expense_id, user_id)
         )
         con.commit()
 
         return (True, "Expense deleted successfully") if cursor.rowcount else (False, "Not authorized")
 
-    except m.Error as err:
+    except Exception as err:
         return False, f"Database error: {err}"
 
     finally:
@@ -219,6 +232,9 @@ def delete_expense(user_id, expense_id):
             con.close()
 
 
+# =========================
+# SUMMARY
+# =========================
 def balance(user_id):
     con = cursor = None
     try:
@@ -226,13 +242,13 @@ def balance(user_id):
         cursor = con.cursor()
 
         cursor.execute(
-            "SELECT COALESCE(SUM(amount),0) FROM INCOME WHERE user_id = %s",
+            "SELECT COALESCE(SUM(amount),0) FROM income WHERE user_id = %s",
             (user_id,)
         )
         total_income = cursor.fetchone()[0]
 
         cursor.execute(
-            "SELECT COALESCE(SUM(amount),0) FROM EXPENSE WHERE user_id = %s",
+            "SELECT COALESCE(SUM(amount),0) FROM expense WHERE user_id = %s",
             (user_id,)
         )
         total_expense = cursor.fetchone()[0]
@@ -243,7 +259,7 @@ def balance(user_id):
             "total_expense": total_expense
         }
 
-    except m.Error as err:
+    except Exception as err:
         return False, f"Database error: {err}"
 
     finally:
@@ -251,6 +267,7 @@ def balance(user_id):
             cursor.close()
         if con:
             con.close()
+
 
 def monthly_summary(user_id, year, month):
     con = cursor = None
@@ -261,13 +278,25 @@ def monthly_summary(user_id, year, month):
         cursor = con.cursor()
 
         cursor.execute(
-            "SELECT COALESCE(SUM(amount),0) FROM INCOME WHERE user_id=%s AND YEAR(date)=%s AND MONTH(date)=%s",
+            """
+            SELECT COALESCE(SUM(amount),0)
+            FROM income
+            WHERE user_id=%s
+            AND EXTRACT(YEAR FROM date)=%s
+            AND EXTRACT(MONTH FROM date)=%s
+            """,
             (user_id, year, month)
         )
         income = cursor.fetchone()[0]
 
         cursor.execute(
-            "SELECT COALESCE(SUM(amount),0) FROM EXPENSE WHERE user_id=%s AND YEAR(date)=%s AND MONTH(date)=%s",
+            """
+            SELECT COALESCE(SUM(amount),0)
+            FROM expense
+            WHERE user_id=%s
+            AND EXTRACT(YEAR FROM date)=%s
+            AND EXTRACT(MONTH FROM date)=%s
+            """,
             (user_id, year, month)
         )
         expense = cursor.fetchone()[0]
@@ -278,7 +307,7 @@ def monthly_summary(user_id, year, month):
             "monthly_balance": income - expense
         }
 
-    except (ValueError, m.Error) as err:
+    except Exception as err:
         return False, f"Error: {err}"
 
     finally:
@@ -287,19 +316,23 @@ def monthly_summary(user_id, year, month):
         if con:
             con.close()
 
+
+# =========================
+# PROFILE
+# =========================
 def get_user_by_id(user_id):
     con = cursor = None
     try:
         con = connectdb()
-        cursor = con.cursor(dictionary=True)
+        cursor = con.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute(
-            "SELECT id, username FROM USERS WHERE id = %s",
+            "SELECT id, username FROM users WHERE id = %s",
             (user_id,)
         )
         return cursor.fetchone()
 
-    except m.Error:
+    except Exception:
         return None
 
     finally:
@@ -308,14 +341,15 @@ def get_user_by_id(user_id):
         if con:
             con.close()
 
+
 def change_password(user_id, old_password, new_password):
     con = cursor = None
     try:
         con = connectdb()
-        cursor = con.cursor(dictionary=True)
+        cursor = con.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute(
-            "SELECT password FROM USERS WHERE id = %s",
+            "SELECT password FROM users WHERE id = %s",
             (user_id,)
         )
         user = cursor.fetchone()
@@ -327,14 +361,14 @@ def change_password(user_id, old_password, new_password):
 
         cursor = con.cursor()
         cursor.execute(
-            "UPDATE USERS SET password = %s WHERE id = %s",
+            "UPDATE users SET password = %s WHERE id = %s",
             (new_hashed, user_id)
         )
         con.commit()
 
         return True, "Password updated successfully"
 
-    except m.Error as err:
+    except Exception as err:
         return False, f"Database error: {err}"
 
     finally:
