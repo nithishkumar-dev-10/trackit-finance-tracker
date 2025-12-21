@@ -25,7 +25,7 @@ This project follows clean backend architecture using Flask Blueprints and is de
 
 - **Backend**: Python, Flask
 - **Frontend**: HTML, CSS, Jinja2
-- **Database**: MySQL
+- **Database**: Postgre Sql
 - **Authentication**: Werkzeug Security
 - **Version Control**: Git & GitHub
 - **Deployment Ready**: Yes (Render compatible)
