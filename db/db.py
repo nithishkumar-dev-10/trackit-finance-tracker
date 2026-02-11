@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
 
+
 # =========================
 # DATABASE CONNECTION
 # =========================
@@ -370,6 +371,52 @@ def change_password(user_id, old_password, new_password):
 
     except Exception as err:
         return False, f"Database error: {err}"
+
+    finally:
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
+
+
+def init_db():
+    con = cursor = None
+    try:
+        con = connectdb()
+        cursor = con.cursor()
+
+        # USERS TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(150) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL
+        );
+        """)
+
+        # INCOME TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS income (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            date DATE NOT NULL,
+            amount FLOAT NOT NULL,
+            source VARCHAR(255)
+        );
+        """)
+
+        # EXPENSE TABLE
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS expense (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            date DATE NOT NULL,
+            amount FLOAT NOT NULL,
+            purpose VARCHAR(255)
+        );
+        """)
+
+        con.commit()
 
     finally:
         if cursor:
