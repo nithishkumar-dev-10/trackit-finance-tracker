@@ -1,4 +1,4 @@
-# TrackIt – Finance Tracker Backend
+# TrackIt – Finance Tracker 
 
 TrackIt is a modular, database-driven personal finance tracking web application built using Flask.
 
