@@ -40,10 +40,11 @@ The goal of this project was not just feature implementation, but to understand 
 
 ## 🌍 Deployment
 
-This project is deployed to demonstrate production-style behavior beyond local development.
+TrackIt is deployed on Render to simulate a real-world production backend setup.
 
-(If deployed, add platform here: Render / Railway / etc.)
+The deployment process involved configuring environment variables, establishing secure database connectivity, and ensuring production-ready backend behavior.
 
+🔗 Live Application: https://trackit-nk.onrender.com
 ---
 
 ## 🔜 Next Steps
