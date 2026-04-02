@@ -6,6 +6,7 @@ TrackIt is a modular, database-driven personal finance tracking web application 
 The goal of this project was not just feature implementation, but to understand how production-style backend systems are structured — including API design, authentication, database persistence, and scalable architecture.
 
 
+
 ---
 
 ## 🚀 Tech Stack
